@@ -1,0 +1,68 @@
+{
+    "7708627627": [
+        {
+            "ip": "px400501.pointtoserver.com",
+            "port": "10780",
+            "username": "purevpn0s13884209",
+            "password": "!f7$2qE7TPT{",
+            "proxy_url": "http://purevpn0s13884209:!f7$2qE7TPT{@px400501.pointtoserver.com:10780",
+            "type": "http"
+        },
+        {
+            "ip": "px870303.pointtoserver.com",
+            "port": "10780",
+            "username": "purevpn0s13884209",
+            "password": "!f7$2qE7TPT{",
+            "proxy_url": "http://purevpn0s13884209:!f7$2qE7TPT{@px870303.pointtoserver.com:10780",
+            "type": "http"
+        },
+        {
+            "ip": "px460403.pointtoserver.com",
+            "port": "10780",
+            "username": "purevpn0s13884209",
+            "password": "!f7$2qE7TPT{",
+            "proxy_url": "http://purevpn0s13884209:!f7$2qE7TPT{@px460403.pointtoserver.com:10780",
+            "type": "http"
+        },
+        {
+            "ip": "px040706.pointtoserver.com",
+            "port": "10780",
+            "username": "purevpn0s13884209",
+            "password": "!f7$2qE7TPT{",
+            "proxy_url": "http://purevpn0s13884209:!f7$2qE7TPT{@px040706.pointtoserver.com:10780",
+            "type": "http"
+        },
+        {
+            "ip": "px051703.pointtoserver.com",
+            "port": "10780",
+            "username": "purevpn0s13884209",
+            "password": "!f7$2qE7TPT{",
+            "proxy_url": "http://purevpn0s13884209:!f7$2qE7TPT{@px051703.pointtoserver.com:10780",
+            "type": "http"
+        },
+        {
+            "ip": "px041202.pointtoserver.com",
+            "port": "10780",
+            "username": "purevpn0s13884209",
+            "password": "!f7$2qE7TPT{",
+            "proxy_url": "http://purevpn0s13884209:!f7$2qE7TPT{@px041202.pointtoserver.com:10780",
+            "type": "http"
+        },
+        {
+            "ip": "px470108.pointtoserver.com",
+            "port": "10780",
+            "username": "purevpn0s13884209",
+            "password": "!f7$2qE7TPT{",
+            "proxy_url": "http://purevpn0s13884209:!f7$2qE7TPT{@px470108.pointtoserver.com:10780",
+            "type": "http"
+        },
+        {
+            "ip": "px950403.pointtoserver.com",
+            "port": "10780",
+            "username": "purevpn0s13884209",
+            "password": "!f7$2qE7TPT{",
+            "proxy_url": "http://purevpn0s13884209:!f7$2qE7TPT{@px950403.pointtoserver.com:10780",
+            "type": "http"
+        }
+    ]
+}
